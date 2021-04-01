@@ -4,19 +4,24 @@ using System.Collections.Generic;
 public class Tyle {
     public int Left,Right;
 }
-
+public enum Room_Type {
+    Unassigned,
+    Start,
+    Exit,
+    Maze
+}
 public class Room{
+    public Room_Type Type;
     public int Width, Height;
     public int X,Y;
 }
 
 public class Program {
 
-    public const int MAP_MAX = 25;
-    public const int MAP_MIN = 17;
-
-    public const int ROOM_MAX = 5;
-    public const int ROOM_MIN = 3;
+    public const int MAP_MAX = 40;
+    public const int MAP_MIN = 20;
+    public const int ROOM_MAX = 10;
+    public const int ROOM_MIN = 4;
 
     public static void Main(string[] args) {
         // Instantiate random number generator using system-supplied value as seed.
@@ -52,7 +57,7 @@ public class Program {
             }
             //if the rectangle is small enough to be considered a room;
             if( (Right > down ? Right : down) < ROOM_MAX) {
-                rooms.Add(new Room() {Width = Right, Height = down, X = addresses.Peek()%width, Y = addresses.Peek()/width});
+                rooms.Add(new Room() {Type = Room_Type.Unassigned ,Width = Right, Height = down, X = addresses.Peek()%width, Y = addresses.Peek()/width});
                 addresses.Dequeue();
             }
             else { // the retancle needs to be divided
@@ -76,6 +81,26 @@ public class Program {
                 }
             }
         }
+        // pick rooms
+        // get a random start room
+        int start = rand.Next(rooms.Count);
+        rooms[start].Type = Room_Type.Start;
+        List<int> psbl = new List<int>();
+        for(int i=0; i<rooms.Count; i++) {
+            if(Math.Abs(rooms[i].X-rooms[start].X)+Math.Abs(rooms[i].Y-rooms[start].Y) > (width+height)/3) {
+                psbl.Add(i);
+            }
+        }
+        int end = psbl[rand.Next(psbl.Count)];
+        rooms[end].Type = Room_Type.Exit;
+        for(int i=0; i<rooms.Count; i++) {
+            gen[rooms[i].Y,rooms[i].X] = i;
+        }
+        Console.Write("possible rooms: ");
+        foreach( int i in psbl) 
+            Console.Write(i+" ");
+        Console.WriteLine("\nStart: "+start+"\nExit: "+end);
+
         // print standard map
         Console.WriteLine("reg map:");
         for(int y=0; y<gen.GetLength(0); y++) {
@@ -87,62 +112,28 @@ public class Program {
             }
             Console.WriteLine(temp);
         }
-        // convert standard map to a triangle map
-        Tyle[,] map = new Tyle[height,width];
-        for(int y = 0; y < height; y++) {
-            for(int x = 0; x < width; x++) {
-                map[y,x] = new Tyle();
-                map[y,x].Left = gen[y,x];
-                map[y,x].Right = gen[y,x];
-            }
-        }
-        Console.WriteLine();
-        //print triangle map
-        for(int di=1; di<width+height; di++) {
-            string temp = "";
-            for(int i = 0; i < (di<=height?height-di:di-height); i++)
-                temp += ("  ");
-            for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
-                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left+" ";
-                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right+" ";
-            }
-            Console.WriteLine(temp);
-        }
-        Console.WriteLine("\nrooms: "+rooms.Count);
-        // for(int i = 0; i < width+height-1; i++) {
-        //     string temp = "";
-        //     for(int k = 0; k < Math.Abs(height - 1 - i); k++) {
-        //         temp += "  ";
-        //     }
-        //     for(int j = 0; j < (width>height?height:width); j++) {
-        //         temp += map[(i<height?i:(height-j)),j].Left + " " + map[(i<height?i:(height-j)),j].Right + " ";
-        //     }
-        //     Console.WriteLine(temp);
-        // }
-
         // // convert standard map to a triangle map
-        // int[][] map = new int[height*2][];
-        // for(int y=0; y<height; y++) {
-        //     map[2*y] = new int[width-(y%2==1 ? 1 : 0)];
-        //     map[2*y+1] = new int[width-(y%2==1 ? 0 : 1)];
-        //     for(int x=0; x<width; x++) {
-        //         if(x!=width-1 || y%2==0)
-        //             map[2*y][x] = (y%2==0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
-        //         if(x!=width-1 || y%2!=0) 
-        //             map[2*y+1][x] = (y%2!=0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
+        // Tyle[,] map = new Tyle[height,width];
+        // for(int y = 0; y < height; y++) {
+        //     for(int x = 0; x < width; x++) {
+        //         map[y,x] = new Tyle();
+        //         map[y,x].Left = gen[y,x];
+        //         map[y,x].Right = gen[y,x];
         //     }
         // }
-        
-        // // print triangle map
-        // Console.WriteLine("\ntriangle converted: ");
-        // for(int y=0; y<map.Length; y++) {
-        //     string temp = y%4==1||y%4==2 ? "   ":"";
-        //     for(int x=0; x<map[y].Length; x++) {
-        //         temp += map[y][x];
-        //         temp += "     ";
+        // Console.WriteLine();
+        // //print triangle map
+        // for(int di=1; di<width+height; di++) {
+        //     string temp = "";
+        //     for(int i = 0; i < (di<=height?height-di:di-height); i++)
+        //         temp += ("  ");
+        //     for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
+        //         temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left+" ";
+        //         temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right+" ";
         //     }
         //     Console.WriteLine(temp);
         // }
+        // Console.WriteLine("\nrooms: "+rooms.Count);
         
     }
 }
