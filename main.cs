@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-public class tyle {
-    public int left,right;
+public class Tyle {
+    public int Left,Right;
+}
+
+public class Room{
+    public int Width, Height;
+    public int X,Y;
 }
 
 public class Program {
@@ -29,14 +34,15 @@ public class Program {
             }
         }
         // generate rooms
+        List<Room> rooms = new List<Room>();
         Queue<int> addresses = new Queue<int>();
         addresses.Enqueue(1*width+1); //add (1,1) to queue
         while(addresses.Count > 0) {
             //determine if width or height is longer
-            int right = 0,down = 0;
+            int Right = 0,down = 0;
             int pos = addresses.Peek();
             while(gen[pos/width, pos%width] != 1) {
-                right++;
+                Right++;
                 pos++;
             }
             pos = addresses.Peek();
@@ -45,12 +51,15 @@ public class Program {
                 pos+=width;
             }
             //if the rectangle is small enough to be considered a room;
-            if( (right > down ? right : down) < ROOM_MAX) addresses.Dequeue();
+            if( (Right > down ? Right : down) < ROOM_MAX) {
+                rooms.Add(new Room() {Width = Right, Height = down, X = addresses.Peek()%width, Y = addresses.Peek()/width});
+                addresses.Dequeue();
+            }
             else { // the retancle needs to be divided
                 // where wall will created after being added to pos
                 int div = rand.Next(ROOM_MIN, ROOM_MAX);
                 pos = addresses.Peek();
-                if(right > down) { //cut vertically
+                if(Right > down) { //cut vertically
                     // if rectangle being created is big enough add to queue
                     if( width-(pos%width+div+1) > ROOM_MIN ) addresses.Enqueue(pos+div+1);
                     while(gen[pos/width, pos%width+div] != 1) {
@@ -79,12 +88,12 @@ public class Program {
             Console.WriteLine(temp);
         }
         // convert standard map to a triangle map
-        tyle[,] map = new tyle[height,width];
+        Tyle[,] map = new Tyle[height,width];
         for(int y = 0; y < height; y++) {
             for(int x = 0; x < width; x++) {
-                map[y,x] = new tyle();
-                map[y,x].left = gen[y,x];
-                map[y,x].right = gen[y,x];
+                map[y,x] = new Tyle();
+                map[y,x].Left = gen[y,x];
+                map[y,x].Right = gen[y,x];
             }
         }
         Console.WriteLine();
@@ -94,18 +103,19 @@ public class Program {
             for(int i = 0; i < (di<=height?height-di:di-height); i++)
                 temp += ("  ");
             for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
-                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].left+" ";
-                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].right+" ";
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left+" ";
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right+" ";
             }
             Console.WriteLine(temp);
         }
+        Console.WriteLine("\nrooms: "+rooms.Count);
         // for(int i = 0; i < width+height-1; i++) {
         //     string temp = "";
         //     for(int k = 0; k < Math.Abs(height - 1 - i); k++) {
         //         temp += "  ";
         //     }
         //     for(int j = 0; j < (width>height?height:width); j++) {
-        //         temp += map[(i<height?i:(height-j)),j].left + " " + map[(i<height?i:(height-j)),j].right + " ";
+        //         temp += map[(i<height?i:(height-j)),j].Left + " " + map[(i<height?i:(height-j)),j].Right + " ";
         //     }
         //     Console.WriteLine(temp);
         // }
