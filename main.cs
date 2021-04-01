@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 
+public class tyle {
+    public int left,right;
+}
+
 public class Program {
 
-    public const int MAP_MAX = 40;
-    public const int MAP_MIN = 30;
+    public const int MAP_MAX = 25;
+    public const int MAP_MIN = 17;
 
-    public const int ROOM_MAX = 7;
-    public const int ROOM_MIN = 4;
+    public const int ROOM_MAX = 5;
+    public const int ROOM_MIN = 3;
 
     public static void Main(string[] args) {
         // Instantiate random number generator using system-supplied value as seed.
@@ -24,8 +28,6 @@ public class Program {
                 else if(j == 0 || j == width-1) gen[i,j] = 1;
             }
         }
-
-
         // generate rooms
         Queue<int> addresses = new Queue<int>();
         addresses.Enqueue(1*width+1); //add (1,1) to queue
@@ -64,22 +66,6 @@ public class Program {
                     }
                 }
             }
-            
-            
-
-        }
-            
-        //convert standard map to a triangle map
-        int[][] map = new int[height*2][];
-        for(int y=0; y<height; y++) {
-            map[2*y] = new int[width-(y%2==1 ? 1 : 0)];
-            map[2*y+1] = new int[width-(y%2==1 ? 0 : 1)];
-            for(int x=0; x<width; x++) {
-                if(x!=width-1 || y%2==0)
-                    map[2*y][x] = (y%2==0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
-                if(x!=width-1 || y%2!=0) 
-                    map[2*y+1][x] = (y%2!=0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
-            }
         }
         // print standard map
         Console.WriteLine("reg map:");
@@ -92,16 +78,61 @@ public class Program {
             }
             Console.WriteLine(temp);
         }
-        // print triangle map
-        Console.WriteLine("\ntriangle converted: ");
-        for(int y=0; y<map.Length; y++) {
-            string temp = y%4==1||y%4==2 ? "   ":"";
-            for(int x=0; x<map[y].Length; x++) {
-                temp += map[y][x];
-                temp += "     ";
+        // convert standard map to a triangle map
+        tyle[,] map = new tyle[height,width];
+        for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
+                map[y,x] = new tyle();
+                map[y,x].left = gen[y,x];
+                map[y,x].right = gen[y,x];
+            }
+        }
+        Console.WriteLine();
+        //print triangle map
+        for(int di=1; di<width+height; di++) {
+            string temp = "";
+            for(int i = 0; i < (di<=height?height-di:di-height); i++)
+                temp += ("  ");
+            for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].left+" ";
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].right+" ";
             }
             Console.WriteLine(temp);
         }
+        // for(int i = 0; i < width+height-1; i++) {
+        //     string temp = "";
+        //     for(int k = 0; k < Math.Abs(height - 1 - i); k++) {
+        //         temp += "  ";
+        //     }
+        //     for(int j = 0; j < (width>height?height:width); j++) {
+        //         temp += map[(i<height?i:(height-j)),j].left + " " + map[(i<height?i:(height-j)),j].right + " ";
+        //     }
+        //     Console.WriteLine(temp);
+        // }
+
+        // // convert standard map to a triangle map
+        // int[][] map = new int[height*2][];
+        // for(int y=0; y<height; y++) {
+        //     map[2*y] = new int[width-(y%2==1 ? 1 : 0)];
+        //     map[2*y+1] = new int[width-(y%2==1 ? 0 : 1)];
+        //     for(int x=0; x<width; x++) {
+        //         if(x!=width-1 || y%2==0)
+        //             map[2*y][x] = (y%2==0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
+        //         if(x!=width-1 || y%2!=0) 
+        //             map[2*y+1][x] = (y%2!=0 ? gen[y,x] : ((gen[y,x]==1 || gen[y,x+1]==1) ? 1 : gen[y,x]));
+        //     }
+        // }
+        
+        // // print triangle map
+        // Console.WriteLine("\ntriangle converted: ");
+        // for(int y=0; y<map.Length; y++) {
+        //     string temp = y%4==1||y%4==2 ? "   ":"";
+        //     for(int x=0; x<map[y].Length; x++) {
+        //         temp += map[y][x];
+        //         temp += "     ";
+        //     }
+        //     Console.WriteLine(temp);
+        // }
         
     }
 }
