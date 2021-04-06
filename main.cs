@@ -66,14 +66,14 @@ public class Program {
                 pos = addresses.Peek();
                 if(Right > down) { //cut vertically
                     // if rectangle being created is big enough add to queue
-                    if( width-(pos%width+div+1) > ROOM_MIN ) addresses.Enqueue(pos+div+1);
+                    if(width-(pos%width+div+1) > ROOM_MIN ) addresses.Enqueue(pos+div+1);
                     while(gen[pos/width, pos%width+div] != 1) {
                         gen[pos/width, pos%width+div] = 1;
                         pos+=width;
                     }
                 } else { //cut horizontally
                     // if rectangle being created is big enough add to queue
-                    if( height-(pos/width+div+1) > ROOM_MIN ) addresses.Enqueue(pos+(div+1)*width);
+                    if(height-(pos/width+div+1) > ROOM_MIN ) addresses.Enqueue(pos+(div+1)*width);
                     while(gen[pos/width+div, pos%width] != 1) {
                         gen[pos/width+div, pos%width] = 1;
                         pos++;
@@ -93,13 +93,35 @@ public class Program {
         }
         int end = psbl[rand.Next(psbl.Count)];
         rooms[end].Type = Room_Type.Exit;
-        for(int i=0; i<rooms.Count; i++) {
-            gen[rooms[i].Y,rooms[i].X] = i;
-        }
+        // // show room numbers
+        // for(int i=0; i<rooms.Count; i++) {
+        //     gen[rooms[i].Y,rooms[i].X] = i;
+        // }
         Console.Write("possible rooms: ");
-        foreach( int i in psbl) 
+        foreach(int i in psbl) 
             Console.Write(i+" ");
         Console.WriteLine("\nStart: "+start+"\nExit: "+end);
+        // initialize the rooms that are unnassigned as maze rooms
+        foreach(Room r in rooms) {
+            if(r.Type == Room_Type.Unassigned) 
+                r.Type = Room_Type.Maze;
+        }
+        // initialize doors
+        foreach (Room r in rooms) {
+            //do door stuff
+            
+        }
+        // initialize rooms
+        foreach(Room r in rooms) {
+            switch(r.Type) {
+                case Room_Type.Start: // initialize Start Room
+                    break;
+                case Room_Type.Exit: // initialize Exit Room
+                    break;
+                case Room_Type.Maze: // initialize Maze Room
+                    break;
+            }
+        }
 
         // print standard map
         Console.WriteLine("reg map:");
@@ -112,28 +134,30 @@ public class Program {
             }
             Console.WriteLine(temp);
         }
-        // // convert standard map to a triangle map
-        // Tyle[,] map = new Tyle[height,width];
-        // for(int y = 0; y < height; y++) {
-        //     for(int x = 0; x < width; x++) {
-        //         map[y,x] = new Tyle();
-        //         map[y,x].Left = gen[y,x];
-        //         map[y,x].Right = gen[y,x];
-        //     }
-        // }
-        // Console.WriteLine();
-        // //print triangle map
-        // for(int di=1; di<width+height; di++) {
-        //     string temp = "";
-        //     for(int i = 0; i < (di<=height?height-di:di-height); i++)
-        //         temp += ("  ");
-        //     for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
-        //         temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left+" ";
-        //         temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right+" ";
-        //     }
-        //     Console.WriteLine(temp);
-        // }
-        // Console.WriteLine("\nrooms: "+rooms.Count);
+      
+        // convert standard map to a triangle map
+        Tyle[,] map = new Tyle[height,width];
+        for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
+                map[y,x] = new Tyle();
+                map[y,x].Left = gen[y,x];
+                map[y,x].Right = gen[y,x];
+            }
+        }
+        Console.WriteLine();
+
+        //print triangle map
+        for(int di=1; di<width+height; di++) {
+            string temp = "";
+            for(int i = 0; i < (di<=height?height-di:di-height); i++)
+                temp += ("  ");
+            for(int ro=0; ro<(di<(height>width?width:height)?di:( di-(width>height?height:width) < Math.Abs(width-height) ? (width>height?height:width) : Math.Abs(di-width-height) )); ro++) {
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Left+" ";
+                temp += map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right==0?"  ":map[(di<height?di:height)-ro-1,ro+(di>height?di-height:0)].Right+" ";
+            }
+            Console.WriteLine(temp);
+        }
+        Console.WriteLine("\nrooms: "+rooms.Count);
         
     }
 }
